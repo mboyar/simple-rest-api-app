@@ -5,7 +5,12 @@ import (
 	"testing"
 )
 
+var strTest1 string = "Startup duration of the system: Startup finished in 5.225s (kernel) + 2min 15.289s (userspace) = 2min 20.515s graphical.target reached after 2min 15.220s in userspace"
+
+var g_buf []byte = []byte(strTest1)
+
 func Test_responser(t *testing.T) {
+
 	type args struct {
 		duration []byte
 		version  string
@@ -15,7 +20,8 @@ func Test_responser(t *testing.T) {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
+		{"test1", args{g_buf, "v2.0", "Hello golang rest api"}},
+		{"test2", args{g_buf, "v0.2", "Mello golang fest zapi"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -30,7 +36,8 @@ func Test_getDuration(t *testing.T) {
 		want    []byte
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"test1", g_buf, true},
+		{"test2", g_buf, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

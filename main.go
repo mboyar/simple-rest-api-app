@@ -7,11 +7,10 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
-	//"strings"
-	//"unicode/utf8"
 )
 
 const strVersion string = "v0.1"
+const bufSize uint16 = 500
 
 func main() {
 
@@ -31,6 +30,8 @@ func getVersion() string {
 
 func getDuration() ([]byte, error) {
 
+	//preinstalled command name in systemd based systems.
+	//see http://manpages.ubuntu.com/manpages/bionic/man1/systemd-analyze.1.html for the details
 	strCmd := "systemd-analyze"
 
 	_, err := exec.LookPath(strCmd)
@@ -38,17 +39,21 @@ func getDuration() ([]byte, error) {
 		log.Fatal(strCmd + " command cannot found in your system")
 	}
 
+	//calling with either "time" arg or w/o any arg results same bootup duration output
 	cmd := exec.Command(strCmd, "time")
 	stdout, err := cmd.StdoutPipe()
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//Exec command as non-block
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
 
-	buf := make([]byte, 500)
+	//reading from io.ReadCloser stream to dynamic allocated byte array
+	buf := make([]byte, bufSize)
 	if _, err := io.ReadFull(stdout, buf); err != nil {
 		log.Println(err)
 	}
@@ -57,8 +62,6 @@ func getDuration() ([]byte, error) {
 		log.Fatal(err)
 	}
 
-	//fmt.Println("len(buf):", len(buf))
-	//fmt.Println("cap(buf):", cap(buf))
 	retBuf := bytes.Trim(buf, "\x00")
 
 	return retBuf, err
@@ -67,6 +70,8 @@ func getDuration() ([]byte, error) {
 func responser(duration []byte, version string, msg string) {
 
 	strDuration := string(duration)
+
+	//h0,h1,h2 are callback functions triggered when any request got by http server
 
 	h0 := func(w http.ResponseWriter, _ *http.Request) {
 
@@ -87,5 +92,6 @@ func responser(duration []byte, version string, msg string) {
 	http.HandleFunc("/version", h1)
 	http.HandleFunc("/duration", h2)
 
+	//Listen port 8080 in blocking mode
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
