@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	
 )
 
 const strVersion string = "v0.1"
@@ -21,7 +22,9 @@ func main() {
 	strVersion := getVersion()
 	bufDuration, _ := getDuration()
 
-	responser(bufDuration, strVersion, strMsg)
+	go responser(bufDuration, strVersion, strMsg)
+
+	select {}
 }
 
 func getVersion() string {
@@ -36,7 +39,8 @@ func getDuration() ([]byte, error) {
 
 	_, err := exec.LookPath(strCmd)
 	if err != nil {
-		log.Fatal(strCmd + " command cannot found in your system")
+		log.Println(strCmd + " command cannot found in your system")
+		return []byte("systemd-analyze fake output"), err
 	}
 
 	//calling with either "time" arg or w/o any arg results same bootup duration output
