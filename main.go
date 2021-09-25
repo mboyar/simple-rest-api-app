@@ -2,13 +2,23 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os/exec"
-	
 )
+
+type Duration struct {
+	Bootup struct {
+		Kernel          float64 `json:"kernel"`
+		Initrd          float64 `json:"initrd"`
+		Userspace       float64 `json:"userspace"`
+		GraphicalTarget float64 `json:"graphical.target"`
+	} `json:"bootup"`
+	TimeUnit string `json:"time-unit"`
+}
 
 const strVersion string = "v0.1"
 const bufSize uint16 = 500
@@ -67,8 +77,21 @@ func getDuration() ([]byte, error) {
 	}
 
 	retBuf := bytes.Trim(buf, "\x00")
+	//retBuf := parseSystemdAnalyze(buf)
 
 	return retBuf, err
+}
+
+func parseSystemdAnalyze(cmdStdout []byte) []byte {
+
+	// Parses the systemd-analyze output and returns the duration in json format
+
+	var duration Duration
+	var jsonDuration []byte
+
+	jsonDuration, _ = json.Marshal(duration)
+
+	return jsonDuration
 }
 
 func responser(duration []byte, version string, msg string) {
