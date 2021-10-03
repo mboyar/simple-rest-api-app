@@ -1,13 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os/exec"
+	"strings"
+	"time"
 )
 
 type Duration struct {
@@ -76,8 +77,8 @@ func getDuration() ([]byte, error) {
 		log.Fatal(err)
 	}
 
-	retBuf := bytes.Trim(buf, "\x00")
-	//retBuf := parseSystemdAnalyze(buf)
+	//retBuf := bytes.Trim(buf, "\x00")
+	retBuf := parseSystemdAnalyze(buf)
 
 	return retBuf, err
 }
@@ -88,6 +89,35 @@ func parseSystemdAnalyze(cmdStdout []byte) []byte {
 
 	var duration Duration
 	var jsonDuration []byte
+
+	str1 := strings.TrimPrefix(string(cmdStdout[:]), "Startup finished in ")
+	str2 := strings.Split(str1, " = ")
+	str3 := strings.Split(str2[0], " + ")
+
+	//strTotal = str2[1]
+
+	for _, str := range str3 {
+
+		str4 := strings.Split(str, " (")
+
+		//fmt.Printf("%s\n", str4[1])
+		timeDuration, _ := time.ParseDuration(strings.ReplaceAll(str4[0], "in ", ""))
+		//fmt.Printf("%f\n", timeDuration.Seconds())
+
+		if strings.Contains(str4[1], "kernel") {
+			duration.Bootup.Kernel = timeDuration.Seconds()
+		} else if strings.Contains(str4[1], "initrd") {
+			duration.Bootup.Initrd = timeDuration.Seconds()
+		} else if strings.Contains(str4[1], "userspace") {
+			duration.Bootup.Userspace = timeDuration.Seconds()
+		} else if strings.Contains(str4[1], "graphical.target") {
+			duration.Bootup.GraphicalTarget = timeDuration.Seconds()
+		}
+	}
+
+	//fmt.Printf("%q -- %d\n", str3, len(str3))
+
+	duration.TimeUnit = "seconds" //default time unit
 
 	jsonDuration, _ = json.Marshal(duration)
 
