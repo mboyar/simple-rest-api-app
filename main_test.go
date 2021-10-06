@@ -52,3 +52,23 @@ func Test_getDuration(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseSystemdAnalyze(t *testing.T) {
+	type args struct {
+		cmdStdout []byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want []byte
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := parseSystemdAnalyze(tt.args.cmdStdout); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("parseSystemdAnalyze() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
