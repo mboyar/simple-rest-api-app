@@ -25,4 +25,6 @@ $ curl http://localhost:8080/duration
 Startup duration of the system: Startup finished in 5.225s (kernel) + 2min 15.289s (userspace) = 2min 20.515s 
 graphical.target reached after 2min 15.220s in userspace
 
+$ curl http://localhost:8080/duration.json
+{"bootup":{"kernel":5.763,"initrd":0,"userspace":9.894,"graphical.target":9.883},"time-unit":"seconds"}
 ```
